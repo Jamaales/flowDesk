@@ -765,17 +765,15 @@ function loadFuturesUI(){
 
 async function fetchFuturesQuote(symbol){
   try{
-    const res=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`,{headers:{'Accept':'application/json'}});
+    const res=await fetch('/api/futures',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({symbol})
+    });
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
-    const meta=data?.chart?.result?.[0]?.meta;
-    if(!meta)throw new Error('No data');
-    return{
-      price:meta.regularMarketPrice,
-      prevClose:meta.chartPreviousClose||meta.previousClose,
-      change:meta.regularMarketPrice-(meta.chartPreviousClose||meta.previousClose),
-      changePct:((meta.regularMarketPrice-(meta.chartPreviousClose||meta.previousClose))/(meta.chartPreviousClose||meta.previousClose)*100),
-    };
+    if(data.error)throw new Error(data.error);
+    return data;
   }catch(e){return null;}
 }
 
