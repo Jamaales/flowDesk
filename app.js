@@ -14,16 +14,34 @@ let trades = JSON.parse(localStorage.getItem('fd_journal') || '[]');
 let btEntries = JSON.parse(localStorage.getItem('fd_backtest') || '[]');
 let jfilter = 'all';
 let selected = null;
+let checklistMode = localStorage.getItem('fd_checklist_mode') || 'call';
 
-const CHECKLIST = [
+const CHECKLIST_CALL = [
   {id:'c1',label:'Check NQ/ES futures direction',hint:'Futures tab'},
-  {id:'c2',label:'Price above 20 & 50 EMA (daily)?',hint:'TOS daily'},
-  {id:'c3',label:'VWAP reclaim confirmed on 5min?',hint:'TOS 5min'},
-  {id:'c4',label:'RSI under 70 on daily?',hint:'TOS'},
-  {id:'c5',label:'Volume above average?',hint:'TOS'},
-  {id:'c6',label:'Wait for 9:45am before entering',hint:'Entry rule'},
-  {id:'c7',label:'Stop loss defined before entry',hint:'Risk mgmt'},
-  {id:'c8',label:'No overhead resistance within 2%?',hint:'Key levels'},
+  {id:'c2',label:'Price above 50 EMA (daily)',hint:'TOS daily'},
+  {id:'c3',label:'Price above 20 EMA (daily)',hint:'TOS daily'},
+  {id:'c4',label:'Daily RSI between 50-65',hint:'TOS daily'},
+  {id:'c5',label:'VWAP reclaim confirmed on 5min',hint:'TOS 5min'},
+  {id:'c6',label:'Price holding above 9 EMA (5min)',hint:'TOS 5min'},
+  {id:'c7',label:'5min RSI between 50-70',hint:'TOS 5min'},
+  {id:'c8',label:'Volume increasing on reclaim candle',hint:'TOS'},
+  {id:'c9',label:'No resistance within 2% above',hint:'Key levels'},
+  {id:'c10',label:'After 9:45am entry window',hint:'Entry rule'},
+  {id:'c11',label:'Stop loss defined before entry',hint:'Risk mgmt'},
+];
+
+const CHECKLIST_PUT = [
+  {id:'p1',label:'Check NQ/ES futures direction',hint:'Futures tab'},
+  {id:'p2',label:'Price below 50 EMA (daily)',hint:'TOS daily'},
+  {id:'p3',label:'Price below 20 EMA (daily)',hint:'TOS daily'},
+  {id:'p4',label:'Daily RSI between 35-50',hint:'TOS daily'},
+  {id:'p5',label:'VWAP rejection confirmed on 5min',hint:'TOS 5min'},
+  {id:'p6',label:'Price holding below 9 EMA (5min)',hint:'TOS 5min'},
+  {id:'p7',label:'5min RSI between 30-50',hint:'TOS 5min'},
+  {id:'p8',label:'Volume increasing on rejection candle',hint:'TOS'},
+  {id:'p9',label:'No support within 2% below',hint:'Key levels'},
+  {id:'p10',label:'After 9:45am entry window',hint:'Entry rule'},
+  {id:'p11',label:'Stop loss defined before entry',hint:'Risk mgmt'},
 ];
 
 // ════════════════════════════════════════
@@ -94,19 +112,45 @@ function switchTab(tab,el){
 // ════════════════════════════════════════
 // CHECKLIST
 // ════════════════════════════════════════
+function setChecklistMode(mode){
+  checklistMode = mode;
+  localStorage.setItem('fd_checklist_mode', mode);
+  // update toggle buttons
+  var callBtn = document.getElementById('cl-toggle-call');
+  var putBtn = document.getElementById('cl-toggle-put');
+  if(callBtn && putBtn){
+    if(mode === 'call'){
+      callBtn.style.background = 'var(--green-dim)';
+      callBtn.style.color = 'var(--green)';
+      callBtn.style.borderColor = 'var(--green-border)';
+      putBtn.style.background = 'transparent';
+      putBtn.style.color = 'var(--muted)';
+      putBtn.style.borderColor = 'var(--border)';
+    } else {
+      putBtn.style.background = 'var(--red-dim)';
+      putBtn.style.color = 'var(--red)';
+      putBtn.style.borderColor = 'var(--red-border)';
+      callBtn.style.background = 'transparent';
+      callBtn.style.color = 'var(--muted)';
+      callBtn.style.borderColor = 'var(--border)';
+    }
+  }
+  renderChecklist();
+}
+
 function renderChecklist(){
-  document.getElementById('checklist-items').innerHTML = CHECKLIST.map(item=>{
-    const done=!!checklistState[item.id];
+  var list = checklistMode === 'call' ? CHECKLIST_CALL : CHECKLIST_PUT;
+  var color = checklistMode === 'call' ? 'var(--green)' : 'var(--red)';
+  document.getElementById('checklist-items').innerHTML = list.map(function(item){
+    var done = !!checklistState[item.id];
     return '<div class="ci'+(done?' done':'')+'" onclick="toggleCheck(\''+item.id+'\')">'
-      +'<div class="ci-box">'+(done?'checkmark':'')+' </div>'
+      +'<div class="ci-box" style="'+(done?'background:var(--'+(checklistMode==='call'?'green':'red')+'-dim);border-color:var(--'+(checklistMode==='call'?'green':'red')+'-border);color:var(--'+(checklistMode==='call'?'green':'red')+')':'')+'">'+( done?'✓':'')+'</div>'
       +'<div class="ci-lbl">'+item.label+'</div>'
       +'<div class="ci-hint">'+item.hint+'</div>'
       +'</div>';
   }).join('');
-  document.querySelectorAll('.ci-box').forEach((box,i)=>{
-    if(checklistState[CHECKLIST[i].id]) box.textContent='✓';
-  });
 }
+
 function toggleCheck(id){
   checklistState[id]=!checklistState[id];
   localStorage.setItem('fd_checklist',JSON.stringify(checklistState));
@@ -652,7 +696,7 @@ render();
 clearJForm();
 renderJournal();
 loadFuturesUI();
-renderChecklist();
+setChecklistMode(checklistMode);
 updateBtStats();
 renderBtTable();
 clearBtForm();
