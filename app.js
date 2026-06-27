@@ -715,19 +715,20 @@ function updateBtStats(){
 }
 
 function renderBtTable(){
-  const fs=document.getElementById('bt-filt-stock').value;
-  const fr=document.getElementById('bt-filt-result').value;
-  const filtered=btEntries.filter(function(e){return(!fs||e.stock===fs)&&(!fr||e.result===fr);});
-  const tbody=document.getElementById('bt-tbody');
-  const empty=document.getElementById('bt-empty');
+  var fs=document.getElementById('bt-filt-stock').value;
+  var fr=document.getElementById('bt-filt-result').value;
+  var filtered=btEntries.filter(function(e){return(!fs||e.stock===fs)&&(!fr||e.result===fr);});
+  var tbody=document.getElementById('bt-tbody');
+  var empty=document.getElementById('bt-empty');
   if(!filtered.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   function badgeClass(r){return r==='Win'?'sc-strong':r==='Loss'?'sc-weak':'sc-watch';}
   tbody.innerHTML=filtered.map(function(e){
-    const sc=clScore(e.checklist);
-    const scNum=parseInt(sc);
-    const scColor=scNum>=7?'var(--green)':scNum>=5?'var(--cyan)':'var(--amber)';
-    return '<tr>'
+    var sc=clScore(e.checklist);
+    var scNum=parseInt(sc);
+    var scColor=scNum>=7?'var(--green)':scNum>=5?'var(--cyan)':'var(--amber)';
+    var hasLesson = e.lessons ? 'border-left:3px solid var(--cyan);' : '';
+    return '<tr style="cursor:pointer;'+hasLesson+'" onclick="openBtDetail('+e.id+')">'
       +'<td style="font-family:monospace;font-size:11px;">'+e.date+'</td>'
       +'<td><span class="ticker-mono">'+e.stock+'</span></td>'
       +'<td style="font-family:monospace;font-size:11px;">'+(e.time||'--')+'</td>'
@@ -738,10 +739,100 @@ function renderBtTable(){
       +'<td style="font-family:monospace;font-size:11px;color:var(--green)">'+(e.target?'$'+e.target:'--')+'</td>'
       +'<td style="font-family:monospace;font-size:11px;">'+(e.exit?'$'+e.exit:'--')+'</td>'
       +'<td><span class="score-badge '+badgeClass(e.result)+'">'+e.result+'</span></td>'
-      +'<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--hint);" title="'+(e.notes||'')+'">'+(e.notes||'--')+'</td>'
-      +'<td><button class="btn" style="font-size:10px;padding:3px 8px;color:var(--red);border-color:transparent;" onclick="deleteBtEntry('+e.id+')">X</button></td>'
+      +'<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--hint);">'+(e.lessons?'📝 ':'')+(e.notes||'--')+'</td>'
+      +'<td><button class="btn" style="font-size:10px;padding:3px 8px;color:var(--red);border-color:transparent;" onclick="event.stopPropagation();deleteBtEntry('+e.id+')">X</button></td>'
       +'</tr>';
   }).join('');
+}
+
+function openBtDetail(id){
+  var e = btEntries.find(function(x){return x.id===id;});
+  if(!e) return;
+  var modal = document.getElementById('bt-detail-modal');
+  var badgeClass = e.result==='Win'?'sc-strong':e.result==='Loss'?'sc-weak':'sc-watch';
+  var modeLabel = e.checklist && e.checklist.mode ? e.checklist.mode.toUpperCase() : '--';
+  var modeBadgeColor = modeLabel==='CALL'?'var(--green)':'var(--red)';
+
+  // build checklist review
+  var clHTML = '';
+  if(e.checklist){
+    var keys = Object.keys(e.checklist).filter(function(k){return k!=='mode';});
+    var allItems = BT_CALL.concat(BT_PUT);
+    clHTML = keys.map(function(k){
+      var item = allItems.find(function(x){return x.id===k;});
+      var passed = e.checklist[k];
+      var label = item ? item.label : k;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">'
+        +'<div style="width:16px;height:16px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;'
+        +(passed?'background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);':'background:var(--surface2);border:1px solid var(--border);color:var(--hint);')
+        +'">'+(passed?'✓':'')+'</div>'
+        +'<span style="font-size:12px;color:'+(passed?'var(--text)':'var(--hint)')+';">'+label+'</span>'
+        +'</div>';
+    }).join('');
+  }
+
+  modal.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="closeBtDetail(event)">'
+    +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px;" onclick="event.stopPropagation()">'
+
+    // header
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">'
+    +'<div style="display:flex;align-items:center;gap:10px;">'
+    +'<span style="font-family:monospace;font-size:18px;font-weight:700;color:var(--cyan);">'+e.stock+'</span>'
+    +'<span class="score-badge '+badgeClass+'">'+e.result+'</span>'
+    +'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;border:1px solid;color:'+modeBadgeColor+';border-color:'+modeBadgeColor+';background:transparent;">'+modeLabel+'</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;">'
+    +'<button class="btn" onclick="saveBtDetail('+id+')" style="color:var(--green);border-color:var(--green-border);background:var(--green-dim);">Save</button>'
+    +'<button class="btn" onclick="closeBtDetail()">✕ Close</button>'
+    +'</div>'
+    +'</div>'
+
+    // stats grid
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Date</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+e.date+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Time</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+(e.time||'--')+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">RSI D/5m</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+(e.rsiD||'--')+' / '+(e.rsi5||'--')+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Checklist</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+clScore(e.checklist)+'</div></div>'
+    +'</div>'
+
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Entry</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+(e.entry?'$'+e.entry:'--')+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Stop</div><div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--red);">'+(e.stop?'$'+e.stop:'--')+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Target</div><div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--green);">'+(e.target?'$'+e.target:'--')+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Exit</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+(e.exit?'$'+e.exit:'--')+'</div></div>'
+    +'</div>'
+
+    // checklist review
+    +(clHTML?'<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-family:monospace;">Checklist Review</div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px;">'+clHTML+'</div>':'')
+
+    // notes
+    +'<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:monospace;">Setup Notes</div>'
+    +'<textarea id="bt-detail-notes" style="width:100%;font-size:12px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);resize:vertical;min-height:80px;font-family:sans-serif;outline:none;line-height:1.6;margin-bottom:14px;" placeholder="Setup notes...">'+(e.notes||'')+'</textarea>'
+
+    // lessons learned
+    +'<div style="font-size:10px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:monospace;">Lessons Learned</div>'
+    +'<textarea id="bt-detail-lessons" style="width:100%;font-size:12px;padding:10px 12px;border:1px solid var(--cyan-border);border-radius:8px;background:var(--cyan-dim);color:var(--text);resize:vertical;min-height:80px;font-family:sans-serif;outline:none;line-height:1.6;" placeholder="What did this trade teach you? What would you do differently? What did you do well?">'+(e.lessons||'')+'</textarea>'
+
+    +'</div>'
+    +'</div>';
+
+  modal.style.display='block';
+}
+
+function closeBtDetail(event){
+  if(event && event.target !== document.querySelector('#bt-detail-modal > div')) return;
+  document.getElementById('bt-detail-modal').style.display='none';
+}
+
+function saveBtDetail(id){
+  var e = btEntries.find(function(x){return x.id===id;});
+  if(!e) return;
+  e.notes = document.getElementById('bt-detail-notes').value;
+  e.lessons = document.getElementById('bt-detail-lessons').value;
+  saveBt();
+  renderBtTable();
+  document.getElementById('bt-detail-modal').style.display='none';
 }
 
 function exportBtCSV(){
