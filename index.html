@@ -692,17 +692,13 @@ tr:hover td{background:var(--cyan-glow);}
       <div class="ff"><label>Option Strike</label><input type="text" id="bf-strike" placeholder="e.g. 143C"/></div>
       <div class="ff"><label>Option Expiry</label><input type="date" id="bf-expiry"/></div>
     </div>
-    <div class="sh" style="margin:12px 0 8px;">Pre-Trade Checklist</div>
-    <div class="bt-checks">
-      <label class="bt-check"><input type="checkbox" id="bc-ema50"> Above 50 EMA (Daily)</label>
-      <label class="bt-check"><input type="checkbox" id="bc-ema20"> Above 20 EMA (Daily)</label>
-      <label class="bt-check"><input type="checkbox" id="bc-ema9"> Above 9 EMA (5min)</label>
-      <label class="bt-check"><input type="checkbox" id="bc-vwap"> VWAP Reclaim Confirmed</label>
-      <label class="bt-check"><input type="checkbox" id="bc-time"> After 9:45am</label>
-      <label class="bt-check"><input type="checkbox" id="bc-vol"> Volume Confirmed</label>
-      <label class="bt-check"><input type="checkbox" id="bc-rsi"> RSI Under 70</label>
-      <label class="bt-check"><input type="checkbox" id="bc-lvl"> No Resistance Overhead</label>
+    <div class="sh" style="margin:12px 0 8px;">Pre-Trade Checklist
+      <div style="display:flex;gap:6px;">
+        <button id="bt-toggle-call" onclick="setBtMode('call')" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--green-border);background:var(--green-dim);color:var(--green);cursor:pointer;font-family:'Space Grotesk',sans-serif;">CALL</button>
+        <button id="bt-toggle-put" onclick="setBtMode('put')" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Space Grotesk',sans-serif;">PUT</button>
+      </div>
     </div>
+    <div class="bt-checks" id="bt-checklist-items"></div>
     <div class="ff" style="margin:10px 0;"><label>Notes</label><textarea id="bf-notes" placeholder="e.g. Daily doji after gap up, RSI 80, doji on VWAP — correctly skipped. AMD 10:19am." style="min-height:60px;"></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
       <button class="btn" onclick="clearBtForm()">Clear</button>
