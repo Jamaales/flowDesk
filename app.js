@@ -575,26 +575,93 @@ function deleteTrade(i){trades.splice(i,1);saveJournal();renderJournal();}
 // ════════════════════════════════════════
 // BACKTEST
 // ════════════════════════════════════════
+var btMode = localStorage.getItem('fd_bt_mode') || 'call';
+
+function setBtMode(mode){
+  btMode = mode;
+  localStorage.setItem('fd_bt_mode', mode);
+  var callBtn = document.getElementById('bt-toggle-call');
+  var putBtn = document.getElementById('bt-toggle-put');
+  if(callBtn && putBtn){
+    if(mode === 'call'){
+      callBtn.style.background = 'var(--green-dim)';
+      callBtn.style.color = 'var(--green)';
+      callBtn.style.borderColor = 'var(--green-border)';
+      putBtn.style.background = 'transparent';
+      putBtn.style.color = 'var(--muted)';
+      putBtn.style.borderColor = 'var(--border)';
+    } else {
+      putBtn.style.background = 'var(--red-dim)';
+      putBtn.style.color = 'var(--red)';
+      putBtn.style.borderColor = 'var(--red-border)';
+      callBtn.style.background = 'transparent';
+      callBtn.style.color = 'var(--muted)';
+      callBtn.style.borderColor = 'var(--border)';
+    }
+  }
+  renderBtChecklist();
+}
+
 function checkRSI(inp,warnId){
   document.getElementById(warnId).style.display=parseFloat(inp.value)>=70?'block':'none';
 }
 
+var BT_CALL = [
+  {id:'bc1',label:'Price above 50 EMA (Daily)'},
+  {id:'bc2',label:'Price above 20 EMA (Daily)'},
+  {id:'bc3',label:'Price above 9 EMA (5min)'},
+  {id:'bc4',label:'VWAP Reclaim Confirmed'},
+  {id:'bc5',label:'After 9:45am'},
+  {id:'bc6',label:'Volume Confirmed'},
+  {id:'bc7',label:'Daily RSI 50-65'},
+  {id:'bc8',label:'5min RSI 50-70'},
+  {id:'bc9',label:'No Resistance Overhead'},
+  {id:'bc10',label:'Stop Loss Defined'},
+];
+
+var BT_PUT = [
+  {id:'bp1',label:'Price below 50 EMA (Daily)'},
+  {id:'bp2',label:'Price below 20 EMA (Daily)'},
+  {id:'bp3',label:'Price below 9 EMA (5min)'},
+  {id:'bp4',label:'VWAP Rejection Confirmed'},
+  {id:'bp5',label:'After 9:45am'},
+  {id:'bp6',label:'Volume Confirmed'},
+  {id:'bp7',label:'Daily RSI 35-50'},
+  {id:'bp8',label:'5min RSI 30-50'},
+  {id:'bp9',label:'No Support Below'},
+  {id:'bp10',label:'Stop Loss Defined'},
+];
+
+var btCheckState = {};
+
+function renderBtChecklist(){
+  var list = btMode === 'call' ? BT_CALL : BT_PUT;
+  var el = document.getElementById('bt-checklist-items');
+  if(!el) return;
+  el.innerHTML = list.map(function(item){
+    var checked = !!btCheckState[item.id];
+    return '<label class="bt-check" style="'+(checked?'border-color:var(--'+(btMode==='call'?'green':'red')+'-border);background:var(--'+(btMode==='call'?'green':'red')+'-dim);':'')+'">'
+      +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleBtCheck(\''+item.id+'\',this.checked)"> '+item.label
+      +'</label>';
+  }).join('');
+}
+
+function toggleBtCheck(id, checked){
+  btCheckState[id] = checked;
+  renderBtChecklist();
+}
+
 function getBtChecklist(){
-  return{
-    ema50:document.getElementById('bc-ema50').checked,
-    ema20:document.getElementById('bc-ema20').checked,
-    ema9:document.getElementById('bc-ema9').checked,
-    vwap:document.getElementById('bc-vwap').checked,
-    time:document.getElementById('bc-time').checked,
-    vol:document.getElementById('bc-vol').checked,
-    rsi:document.getElementById('bc-rsi').checked,
-    lvl:document.getElementById('bc-lvl').checked
-  };
+  var list = btMode === 'call' ? BT_CALL : BT_PUT;
+  var result = {mode: btMode};
+  list.forEach(function(item){ result[item.id] = !!btCheckState[item.id]; });
+  return result;
 }
 
 function clScore(c){
-  const v=Object.values(c);
-  return v.filter(Boolean).length+'/'+v.length;
+  var keys = Object.keys(c).filter(function(k){ return k !== 'mode'; });
+  var passed = keys.filter(function(k){ return c[k]; }).length;
+  return passed + '/' + keys.length;
 }
 
 function addBtEntry(){
@@ -623,8 +690,9 @@ function addBtEntry(){
 function clearBtForm(){
   ['bf-date','bf-time','bf-rsid','bf-rsi5','bf-entry','bf-stop','bf-target','bf-exit','bf-strike','bf-expiry','bf-notes'].forEach(function(id){document.getElementById(id).value='';});
   ['bf-stock','bf-result'].forEach(function(id){document.getElementById(id).selectedIndex=0;});
-  ['bc-ema50','bc-ema20','bc-ema9','bc-vwap','bc-time','bc-vol','bc-rsi','bc-lvl'].forEach(function(id){document.getElementById(id).checked=false;});
   ['rsi-d-warn','rsi-5-warn'].forEach(function(id){document.getElementById(id).style.display='none';});
+  btCheckState = {};
+  renderBtChecklist();
   document.getElementById('bf-date').value=new Date().toISOString().split('T')[0];
 }
 
@@ -700,6 +768,7 @@ setChecklistMode(checklistMode);
 updateBtStats();
 renderBtTable();
 clearBtForm();
+setBtMode(btMode);
 
 try{
   const saved=JSON.parse(localStorage.getItem('fd_bias')||'{}');
