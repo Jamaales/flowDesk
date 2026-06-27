@@ -376,7 +376,14 @@ tr:hover td{background:var(--cyan-glow);}
   <div class="ema-band" id="ema-band"></div>
 
   <div class="checklist-wrap" style="margin-bottom:16px;">
-    <div class="sh" style="margin-bottom:10px;">Pre-Trade Checklist <span class="sh-sub">reset each morning</span></div>
+    <div class="sh" style="margin-bottom:10px;">
+      Pre-Trade Checklist
+      <div style="display:flex;gap:6px;">
+        <button id="cl-toggle-call" onclick="setChecklistMode('call')" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--green-dim);color:var(--green);border-color:var(--green-border);cursor:pointer;font-family:'Space Grotesk',sans-serif;">CALL</button>
+        <button id="cl-toggle-put" onclick="setChecklistMode('put')" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Space Grotesk',sans-serif;">PUT</button>
+        <button onclick="checklistState={};localStorage.setItem('fd_checklist','{}');renderChecklist();" style="font-size:10px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--hint);cursor:pointer;font-family:'Space Grotesk',sans-serif;">Reset</button>
+      </div>
+    </div>
     <div class="checklist-grid" id="checklist-items"></div>
   </div>
 
