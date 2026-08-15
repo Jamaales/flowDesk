@@ -8,7 +8,6 @@ let tickers = JSON.parse(localStorage.getItem('fd_tickers') || 'null') || [
   {symbol:'QCOM',name:'Qualcomm Inc.',price:'',rsi:'',target:'',stop:'',earnings:'Jul 23',ema20:'',ema50:'',options:'gray',technical:'gray',momentum:'gray',notes:'AI at the edge, mobile chips. Watch for EMA bounces.'},
 ];
 let emaWatch = JSON.parse(localStorage.getItem('fd_ema_watch') || '{}');
-let futuresLevels = JSON.parse(localStorage.getItem('fd_futures_levels') || '{}');
 let checklistState = JSON.parse(localStorage.getItem('fd_checklist') || '{}');
 let trades = JSON.parse(localStorage.getItem('fd_journal') || '[]');
 let btEntries = JSON.parse(localStorage.getItem('fd_backtest') || '[]');
@@ -17,7 +16,6 @@ let selected = null;
 let checklistMode = localStorage.getItem('fd_checklist_mode') || 'call';
 
 const CHECKLIST_CALL = [
-  {id:'c1',label:'Check NQ/ES futures direction',hint:'Futures tab'},
   {id:'c2',label:'Price above 50 EMA (daily)',hint:'TOS daily'},
   {id:'c3',label:'Price above 20 EMA (daily)',hint:'TOS daily'},
   {id:'c4',label:'Daily RSI between 50-65',hint:'TOS daily'},
@@ -31,7 +29,6 @@ const CHECKLIST_CALL = [
 ];
 
 const CHECKLIST_PUT = [
-  {id:'p1',label:'Check NQ/ES futures direction',hint:'Futures tab'},
   {id:'p2',label:'Price below 50 EMA (daily)',hint:'TOS daily'},
   {id:'p3',label:'Price below 20 EMA (daily)',hint:'TOS daily'},
   {id:'p4',label:'Daily RSI between 35-50',hint:'TOS daily'},
@@ -48,24 +45,8 @@ const CHECKLIST_PUT = [
 // SAVE HELPERS
 // ════════════════════════════════════════
 const save = () => localStorage.setItem('fd_tickers', JSON.stringify(tickers));
-const saveLevels = () => localStorage.setItem('fd_futures_levels', JSON.stringify(futuresLevels));
 const saveJournal = () => localStorage.setItem('fd_journal', JSON.stringify(trades));
 const saveBt = () => localStorage.setItem('fd_backtest', JSON.stringify(btEntries));
-
-function saveLevel(c,f,v){if(!futuresLevels[c])futuresLevels[c]={};futuresLevels[c][f]=v;saveLevels();}
-function saveSessionNotes(){localStorage.setItem('fd_session_notes',document.getElementById('session-notes').value);}
-function saveBiasNotes(){localStorage.setItem('fd_bias_notes',document.getElementById('bias-notes').value);}
-function clearBiasNotes(){document.getElementById('bias-notes').value='';saveBiasNotes();}
-
-function saveBias(){
-  const dir = document.getElementById('bias-direction').value;
-  const checks = document.querySelectorAll('#bias-checks .bc input');
-  const score = [...checks].filter(c=>c.checked).length;
-  document.getElementById('bias-val').textContent = dir || 'Not Set';
-  document.getElementById('bias-val').style.color = dir.includes('Bull')?'var(--green)':dir.includes('Bear')?'var(--red)':'var(--muted)';
-  document.getElementById('bias-score').textContent = score+'/'+checks.length;
-  localStorage.setItem('fd_bias', JSON.stringify({dir, checks:[...checks].map(c=>c.checked)}));
-}
 
 function saveEmaWatch(sym,field,val){
   if(!emaWatch[sym])emaWatch[sym]={};
@@ -106,7 +87,6 @@ function switchTab(tab,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('page-'+tab).classList.add('active');
-  if(tab==='bias') renderBiasWatchlist();
 }
 
 // ════════════════════════════════════════
@@ -362,96 +342,6 @@ function saveNotes(){
 
 function saveField(field,val){
   if(selected!==null){tickers[selected][field]=val;save();if(field==='price')updateEmaBiasDisplay();}
-}
-
-// ════════════════════════════════════════
-// MORNING BIAS
-// ════════════════════════════════════════
-function renderBiasWatchlist(){
-  const el=document.getElementById('bias-watchlist-check');
-  if(!tickers.length){el.innerHTML='<div class="empty">No tickers on watchlist.</div>';return;}
-  el.innerHTML=tickers.map(function(t){
-    const b=emaBias(t.symbol);
-    const bc=b==='bull'?'sc-strong':b==='bear'?'sc-weak':'sc-none';
-    const bt=b==='bull'?'Bull':b==='bear'?'Bear':'--';
-    return '<div class="ticker-row">'
-      +'<div class="t-sym">'+t.symbol+'</div>'
-      +'<div class="t-name">'+(t.name||'--')+'</div>'
-      +'<span class="score-badge '+bc+'">'+bt+'</span>'
-      +'<div style="font-size:10px;color:var(--hint);font-family:monospace;margin-left:auto;">'+(t.earnings?'Earnings: '+t.earnings:'')+'</div>'
-      +'</div>';
-  }).join('');
-}
-
-// ════════════════════════════════════════
-// FUTURES
-// ════════════════════════════════════════
-const FS=[{id:'es',sym:'ES=F'},{id:'nq',sym:'NQ=F'},{id:'ym',sym:'YM=F'}];
-
-function loadFuturesUI(){
-  ['es','nq','ym'].forEach(function(c,ci){
-    const d=futuresLevels[c]||{};
-    const card=document.querySelectorAll('#page-futures .levels-card')[ci];
-    if(!card)return;
-    const inps=card.querySelectorAll('.level-inp');
-    const fields=['res','vwap','ema20','ema50','pdh','sup'];
-    inps.forEach(function(inp,i){inp.value=d[fields[i]]||'';});
-  });
-  const sn=document.getElementById('session-notes');
-  if(sn)sn.value=localStorage.getItem('fd_session_notes')||'';
-  const sd=new Date();
-  const sdEl=document.getElementById('session-date');
-  if(sdEl)sdEl.textContent=sd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-  const bdEl=document.getElementById('bias-date');
-  if(bdEl)bdEl.textContent=sd.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-}
-
-async function fetchFQ(symbol){
-  try{
-    const r=await fetch('/api/futures',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symbol:symbol})});
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    if(d.error)throw new Error(d.error);
-    return d;
-  }catch(e){return null;}
-}
-
-function updateFC(id,data){
-  const pe=document.getElementById('fc-'+id+'-price');
-  const ce=document.getElementById('fc-'+id+'-chg');
-  const be=document.getElementById('fc-'+id+'-badge');
-  const te=document.getElementById('fc-'+id+'-ts');
-  if(!data){
-    pe.textContent='Error';pe.style.color='var(--red)';
-    ce.textContent='Could not load';ce.className='fc-chg flat';
-    be.textContent='--';be.className='fc-badge fc-flat';return;
-  }
-  const price=parseFloat(data.price),chg=parseFloat(data.change),pct=parseFloat(data.changePct);
-  const up=chg>=0,flat=Math.abs(pct)<0.05;
-  pe.textContent=price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  pe.style.color=flat?'var(--text)':up?'var(--green)':'var(--red)';
-  ce.textContent=(up?'+':'')+chg.toFixed(2)+' ('+(up?'+':'')+pct.toFixed(2)+'%)';
-  ce.className='fc-chg '+(flat?'flat':up?'up':'down');
-  be.textContent=flat?'FLAT':up?'UP':'DOWN';
-  be.className='fc-badge '+(flat?'fc-flat':up?'fc-up':'fc-down');
-  te.textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-}
-
-async function refreshFutures(){
-  const btn=document.getElementById('futures-refresh-btn');
-  const st=document.getElementById('futures-status');
-  btn.disabled=true;btn.textContent='Loading...';st.textContent='Fetching prices...';
-  FS.forEach(function(f){
-    document.getElementById('fc-'+f.id+'-price').textContent='--';
-    document.getElementById('fc-'+f.id+'-price').style.color='var(--hint)';
-    document.getElementById('fc-'+f.id+'-chg').textContent='loading...';
-  });
-  try{
-    const res=await Promise.all(FS.map(function(f){return fetchFQ(f.sym);}));
-    FS.forEach(function(f,i){updateFC(f.id,res[i]);});
-    st.textContent='Last refreshed '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  }catch(e){st.textContent='Error loading prices. Try again.';}
-  btn.disabled=false;btn.textContent='Refresh Prices';
 }
 
 // ════════════════════════════════════════
@@ -854,26 +744,8 @@ function exportBtCSV(){
 render();
 clearJForm();
 renderJournal();
-loadFuturesUI();
 setChecklistMode(checklistMode);
 updateBtStats();
 renderBtTable();
 clearBtForm();
 setBtMode(btMode);
-
-try{
-  const saved=JSON.parse(localStorage.getItem('fd_bias')||'{}');
-  if(saved.dir){
-    document.getElementById('bias-direction').value=saved.dir;
-    document.getElementById('bias-val').textContent=saved.dir;
-    document.getElementById('bias-val').style.color=saved.dir.includes('Bull')?'var(--green)':saved.dir.includes('Bear')?'var(--red)':'var(--muted)';
-  }
-  if(saved.checks){
-    const boxes=document.querySelectorAll('#bias-checks .bc input');
-    boxes.forEach(function(b,i){if(saved.checks[i])b.checked=true;});
-  }
-  saveBias();
-}catch(e){}
-
-const bn=document.getElementById('bias-notes');
-if(bn)bn.value=localStorage.getItem('fd_bias_notes')||'';
