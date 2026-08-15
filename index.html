@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,54 +176,6 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .thesis-area::placeholder{color:var(--hint);}
 .thesis-area:focus{border-color:var(--cyan);}
 
-/* ── FUTURES ── */
-.futures-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.fc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 16px;}
-.fc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.fc-sym{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;}
-.fc-name{font-size:10px;color:var(--hint);margin-top:1px;}
-.fc-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:4px;font-family:'JetBrains Mono',monospace;}
-.fc-up{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
-.fc-down{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);}
-.fc-flat{background:var(--surface2);color:var(--hint);border:1px solid var(--border);}
-.fc-price{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;margin-bottom:3px;}
-.fc-chg{font-family:'JetBrains Mono',monospace;font-size:12px;}
-.fc-chg.up{color:var(--green);}
-.fc-chg.down{color:var(--red);}
-.fc-chg.flat{color:var(--hint);}
-.fc-ts{font-size:10px;color:var(--hint);margin-top:6px;font-family:'JetBrains Mono',monospace;}
-.futures-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
-.futures-status{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-
-/* ── LEVELS ── */
-.levels-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.levels-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.levels-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.levels-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;}
-.levels-body{padding:10px;}
-.level-row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;margin-bottom:4px;border:1px solid transparent;}
-.level-row:last-child{margin-bottom:0;}
-.level-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-family:'JetBrains Mono',monospace;}
-.level-inp{font-family:'JetBrains Mono',monospace;font-size:12px;background:transparent;border:none;outline:none;color:var(--text);width:90px;text-align:right;padding:0;}
-.level-inp::placeholder{color:var(--hint);}
-.lr-vwap{background:var(--blue-dim);border-color:var(--blue-border);}
-.lr-vwap .level-lbl{color:var(--blue);}
-.lr-vwap .level-inp{color:var(--blue);}
-.lr-res{background:var(--red-dim);border-color:var(--red-border);}
-.lr-res .level-lbl{color:var(--red);}
-.lr-res .level-inp{color:var(--red);}
-.lr-sup{background:var(--green-dim);border-color:var(--green-border);}
-.lr-sup .level-lbl{color:var(--green);}
-.lr-sup .level-inp{color:var(--green);}
-.lr-e20{background:var(--cyan-dim);border-color:var(--cyan-border);}
-.lr-e20 .level-lbl{color:var(--cyan);}
-.lr-e20 .level-inp{color:var(--cyan);}
-.lr-e50{background:var(--purple-dim);border-color:var(--purple-border);}
-.lr-e50 .level-lbl{color:var(--purple);}
-.lr-e50 .level-inp{color:var(--purple);}
-.lr-plain{}
-.lr-plain .level-lbl{color:var(--muted);}
-
 /* ── NOTES CARD ── */
 .notes-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;}
 .notes-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -232,25 +183,6 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 textarea.notes{width:100%;font-size:12px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);resize:vertical;min-height:80px;font-family:'Space Grotesk',sans-serif;outline:none;line-height:1.6;}
 textarea.notes::placeholder{color:var(--hint);}
 textarea.notes:focus{border-color:var(--cyan);}
-
-/* ── MORNING BIAS ── */
-.bias-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
-.bias-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;}
-.bias-card-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:'JetBrains Mono',monospace;}
-.bias-select{width:100%;font-size:12px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;font-family:'Space Grotesk',sans-serif;cursor:pointer;margin-bottom:8px;}
-.bias-select:focus{border-color:var(--cyan);}
-.bias-checks{display:flex;flex-direction:column;gap:6px;}
-.bc{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;padding:6px 8px;border-radius:6px;transition:background .15s;}
-.bc:hover{background:var(--surface2);}
-.bc input[type=checkbox]{accent-color:var(--cyan);width:14px;height:14px;}
-.macro-items{display:flex;flex-direction:column;gap:6px;}
-.macro-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.macro-item-lbl{font-size:12px;color:var(--text);flex:1;}
-.macro-item-time{font-size:10px;color:var(--hint);font-family:'JetBrains Mono',monospace;}
-.macro-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;}
-.mb-high{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);}
-.mb-med{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);}
-.mb-low{background:var(--surface3);color:var(--hint);border:1px solid var(--border);}
 
 /* ── JOURNAL ── */
 .jmetrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
@@ -328,7 +260,7 @@ tr:hover td{background:var(--cyan-glow);}
   .topbar-right{display:none;}
   .content{padding:12px 14px;}
   .metrics,.jmetrics,.bt-stats{grid-template-columns:repeat(2,1fr);}
-  .ema-band,.futures-grid,.levels-grid,.bias-grid{grid-template-columns:1fr;}
+  .ema-band{grid-template-columns:1fr;}
   .detail-grid{grid-template-columns:repeat(3,1fr);}
   .ema-detail{grid-template-columns:repeat(2,1fr);}
   .fg3,.fg4{grid-template-columns:repeat(2,1fr);}
@@ -344,8 +276,6 @@ tr:hover td{background:var(--cyan-glow);}
   <div class="logo">flow<em>.</em>desk</div>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('signals',this)">Signals</button>
-    <button class="tab" onclick="switchTab('futures',this)">Futures</button>
-    <button class="tab" onclick="switchTab('bias',this)">Morning Bias</button>
     <button class="tab" onclick="switchTab('journal',this)">Journal</button>
     <button class="tab" onclick="switchTab('backtest',this)">Backtest</button>
   </div>
@@ -432,153 +362,6 @@ tr:hover td{background:var(--cyan-glow);}
     <input type="text" id="t-input" placeholder="Add ticker — press Enter" maxlength="10" onkeydown="if(event.key==='Enter')addTicker()"/>
     <button class="btn btn-cyan" onclick="addTicker()">Add</button>
   </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     FUTURES
-══════════════════════════════════════ -->
-<div id="page-futures" class="page">
-  <div class="futures-grid">
-    <div class="fc">
-      <div class="fc-head"><div><div class="fc-sym">ES</div><div class="fc-name">S&amp;P 500 Futures</div></div><span class="fc-badge fc-flat" id="fc-es-badge">—</span></div>
-      <div class="fc-price" id="fc-es-price" style="color:var(--hint)">—</div>
-      <div class="fc-chg flat" id="fc-es-chg">—</div>
-      <div class="fc-ts" id="fc-es-ts"></div>
-    </div>
-    <div class="fc">
-      <div class="fc-head"><div><div class="fc-sym">NQ</div><div class="fc-name">Nasdaq 100 Futures</div></div><span class="fc-badge fc-flat" id="fc-nq-badge">—</span></div>
-      <div class="fc-price" id="fc-nq-price" style="color:var(--hint)">—</div>
-      <div class="fc-chg flat" id="fc-nq-chg">—</div>
-      <div class="fc-ts" id="fc-nq-ts"></div>
-    </div>
-    <div class="fc">
-      <div class="fc-head"><div><div class="fc-sym">YM</div><div class="fc-name">Dow Jones Futures</div></div><span class="fc-badge fc-flat" id="fc-ym-badge">—</span></div>
-      <div class="fc-price" id="fc-ym-price" style="color:var(--hint)">—</div>
-      <div class="fc-chg flat" id="fc-ym-chg">—</div>
-      <div class="fc-ts" id="fc-ym-ts"></div>
-    </div>
-  </div>
-  <div class="futures-toolbar">
-    <div class="futures-status" id="futures-status">Hit refresh to load prices.</div>
-    <button class="btn btn-cyan" id="futures-refresh-btn" onclick="refreshFutures()">↻ Refresh Prices</button>
-  </div>
-
-  <div class="sh">Key Levels <span class="sh-sub">set each morning — auto-saves</span></div>
-  <div class="levels-grid">
-    <div class="levels-card">
-      <div class="levels-head"><span class="levels-title">ES levels</span><span style="font-size:10px;color:var(--hint)">S&P 500</span></div>
-      <div class="levels-body">
-        <div class="level-row lr-res"><span class="level-lbl">Resistance</span><input class="level-inp" placeholder="e.g. 5280" oninput="saveLevel('es','res',this.value)"/></div>
-        <div class="level-row lr-vwap"><span class="level-lbl">VWAP</span><input class="level-inp" placeholder="e.g. 5240" oninput="saveLevel('es','vwap',this.value)"/></div>
-        <div class="level-row lr-e20"><span class="level-lbl">20 EMA</span><input class="level-inp" placeholder="e.g. 5220" oninput="saveLevel('es','ema20',this.value)"/></div>
-        <div class="level-row lr-e50"><span class="level-lbl">50 EMA</span><input class="level-inp" placeholder="e.g. 5180" oninput="saveLevel('es','ema50',this.value)"/></div>
-        <div class="level-row lr-plain"><span class="level-lbl">PDH</span><input class="level-inp" placeholder="prev day high" oninput="saveLevel('es','pdh',this.value)"/></div>
-        <div class="level-row lr-sup"><span class="level-lbl">Support</span><input class="level-inp" placeholder="e.g. 5200" oninput="saveLevel('es','sup',this.value)"/></div>
-      </div>
-    </div>
-    <div class="levels-card">
-      <div class="levels-head"><span class="levels-title">NQ levels</span><span style="font-size:10px;color:var(--hint)">Nasdaq 100</span></div>
-      <div class="levels-body">
-        <div class="level-row lr-res"><span class="level-lbl">Resistance</span><input class="level-inp" placeholder="e.g. 18800" oninput="saveLevel('nq','res',this.value)"/></div>
-        <div class="level-row lr-vwap"><span class="level-lbl">VWAP</span><input class="level-inp" placeholder="e.g. 18600" oninput="saveLevel('nq','vwap',this.value)"/></div>
-        <div class="level-row lr-e20"><span class="level-lbl">20 EMA</span><input class="level-inp" placeholder="e.g. 18550" oninput="saveLevel('nq','ema20',this.value)"/></div>
-        <div class="level-row lr-e50"><span class="level-lbl">50 EMA</span><input class="level-inp" placeholder="e.g. 18200" oninput="saveLevel('nq','ema50',this.value)"/></div>
-        <div class="level-row lr-plain"><span class="level-lbl">PDH</span><input class="level-inp" placeholder="prev day high" oninput="saveLevel('nq','pdh',this.value)"/></div>
-        <div class="level-row lr-sup"><span class="level-lbl">Support</span><input class="level-inp" placeholder="e.g. 18400" oninput="saveLevel('nq','sup',this.value)"/></div>
-      </div>
-    </div>
-    <div class="levels-card">
-      <div class="levels-head"><span class="levels-title">YM levels</span><span style="font-size:10px;color:var(--hint)">Dow Jones</span></div>
-      <div class="levels-body">
-        <div class="level-row lr-res"><span class="level-lbl">Resistance</span><input class="level-inp" placeholder="e.g. 40200" oninput="saveLevel('ym','res',this.value)"/></div>
-        <div class="level-row lr-vwap"><span class="level-lbl">VWAP</span><input class="level-inp" placeholder="e.g. 39800" oninput="saveLevel('ym','vwap',this.value)"/></div>
-        <div class="level-row lr-e20"><span class="level-lbl">20 EMA</span><input class="level-inp" placeholder="e.g. 39700" oninput="saveLevel('ym','ema20',this.value)"/></div>
-        <div class="level-row lr-e50"><span class="level-lbl">50 EMA</span><input class="level-inp" placeholder="e.g. 39300" oninput="saveLevel('ym','ema50',this.value)"/></div>
-        <div class="level-row lr-plain"><span class="level-lbl">PDH</span><input class="level-inp" placeholder="prev day high" oninput="saveLevel('ym','pdh',this.value)"/></div>
-        <div class="level-row lr-sup"><span class="level-lbl">Support</span><input class="level-inp" placeholder="e.g. 39400" oninput="saveLevel('ym','sup',this.value)"/></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="notes-card">
-    <div class="notes-card-head">
-      <div class="notes-card-title">Pre-Market Read</div>
-      <div style="font-size:10px;color:var(--hint);font-family:'JetBrains Mono',monospace;" id="session-date"></div>
-    </div>
-    <textarea class="notes" id="session-notes" placeholder="Market bias today? Gap up/down, NQ above/below 20 EMA, conviction level, what to watch for..." oninput="saveSessionNotes()" style="min-height:90px;"></textarea>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     MORNING BIAS
-══════════════════════════════════════ -->
-<div id="page-bias" class="page">
-  <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
-    <div class="metric"><div class="metric-label">Market Bias</div><div class="metric-value" id="bias-val" style="font-size:16px;color:var(--muted)">Not Set</div><div class="metric-sub">today's read</div></div>
-    <div class="metric"><div class="metric-label">Checks Passed</div><div class="metric-value green" id="bias-score">0/6</div><div class="metric-sub">pre-market criteria</div></div>
-    <div class="metric"><div class="metric-label">Date</div><div class="metric-value" style="font-size:14px;color:var(--muted)" id="bias-date">—</div><div class="metric-sub">session</div></div>
-  </div>
-
-  <div class="bias-grid">
-    <div class="bias-card">
-      <div class="bias-card-title">Overall Bias</div>
-      <select class="bias-select" id="bias-direction" onchange="saveBias()">
-        <option value="">— Select direction —</option>
-        <option value="Strong Bull">🟢 Strong Bullish</option>
-        <option value="Bull">📈 Bullish</option>
-        <option value="Neutral">⚖️ Neutral</option>
-        <option value="Bear">📉 Bearish</option>
-        <option value="Strong Bear">🔴 Strong Bearish</option>
-      </select>
-      <div class="bias-card-title" style="margin-top:10px;">Pre-Market Criteria</div>
-      <div class="bias-checks" id="bias-checks">
-        <label class="bc"><input type="checkbox" onchange="saveBias()"> NQ futures above prior close</label>
-        <label class="bc"><input type="checkbox" onchange="saveBias()"> ES / NQ above 20 EMA (daily)</label>
-        <label class="bc"><input type="checkbox" onchange="saveBias()"> No major economic events pre-open</label>
-        <label class="bc"><input type="checkbox" onchange="saveBias()"> Watchlist names above VWAP at open</label>
-        <label class="bc"><input type="checkbox" onchange="saveBias()"> RSI not overbought on daily (under 70)</label>
-        <label class="bc"><input type="checkbox" onchange="saveBias()"> No earnings on watchlist today</label>
-      </div>
-    </div>
-    <div class="bias-card">
-      <div class="bias-card-title">Economic Calendar</div>
-      <div class="macro-items" id="macro-items">
-        <div class="macro-item">
-          <div class="macro-item-lbl">CPI Data</div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="macro-item-time">8:30 AM ET</div>
-            <span class="macro-badge mb-high">HIGH</span>
-          </div>
-        </div>
-        <div class="macro-item">
-          <div class="macro-item-lbl">Fed Meeting Minutes</div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="macro-item-time">2:00 PM ET</div>
-            <span class="macro-badge mb-high">HIGH</span>
-          </div>
-        </div>
-        <div class="macro-item">
-          <div class="macro-item-lbl">Jobless Claims</div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="macro-item-time">8:30 AM ET</div>
-            <span class="macro-badge mb-med">MED</span>
-          </div>
-        </div>
-      </div>
-      <button class="btn" style="margin-top:10px;width:100%;font-size:11px;" onclick="window.open('https://www.forexfactory.com/calendar','_blank')">Open Economic Calendar ↗</button>
-    </div>
-  </div>
-
-  <div class="notes-card">
-    <div class="notes-card-head">
-      <div class="notes-card-title">Morning Notes</div>
-      <button class="btn" style="font-size:10px;padding:4px 10px;" onclick="clearBiasNotes()">Clear</button>
-    </div>
-    <textarea class="notes" id="bias-notes" placeholder="What's the thesis for today? Key levels to watch, catalysts, what would change your bias..." oninput="saveBiasNotes()" style="min-height:100px;"></textarea>
-  </div>
-
-  <div class="sh">Watchlist Quick Check <span class="sh-sub">are your setups in position before open?</span></div>
-  <div id="bias-watchlist-check" class="watchlist"></div>
 </div>
 
 <!-- ══════════════════════════════════════
