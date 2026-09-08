@@ -246,6 +246,13 @@ tr:last-child td{border-bottom:none;}
 tr:hover td{background:var(--cyan-glow);}
 .rsi-warn{font-size:10px;color:var(--red);margin-top:3px;font-family:'JetBrains Mono',monospace;display:none;}
 
+/* ── CAN SLIM ── */
+.cs-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;}
+.cs-top{display:flex;align-items:center;gap:8px;margin-bottom:11px;flex-wrap:wrap;}
+.cs-sector{font-size:10px;padding:2px 9px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;}
+.cs-reviewed{font-size:10px;color:var(--hint);font-family:'JetBrains Mono',monospace;margin-left:auto;}
+.cs-checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-bottom:10px;}
+
 /* ── MISC ── */
 .empty{text-align:center;padding:2.5rem;color:var(--hint);font-size:13px;}
 .status-msg{font-size:11px;color:var(--muted);text-align:center;padding:6px;font-family:'JetBrains Mono',monospace;min-height:26px;}
@@ -267,6 +274,7 @@ tr:hover td{background:var(--cyan-glow);}
   .tgrid{grid-template-columns:repeat(3,1fr);}
   .checklist-grid{grid-template-columns:1fr;}
   .bt-checks{grid-template-columns:repeat(2,1fr);}
+  .cs-checklist{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -276,6 +284,7 @@ tr:hover td{background:var(--cyan-glow);}
   <div class="logo">flow<em>.</em>desk</div>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('signals',this)">Signals</button>
+    <button class="tab" onclick="switchTab('canslim',this)">CAN SLIM</button>
     <button class="tab" onclick="switchTab('journal',this)">Journal</button>
     <button class="tab" onclick="switchTab('backtest',this)">Backtest</button>
   </div>
@@ -362,6 +371,53 @@ tr:hover td{background:var(--cyan-glow);}
     <input type="text" id="t-input" placeholder="Add ticker — press Enter" maxlength="10" onkeydown="if(event.key==='Enter')addTicker()"/>
     <button class="btn btn-cyan" onclick="addTicker()">Add</button>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CAN SLIM
+══════════════════════════════════════ -->
+<div id="page-canslim" class="page">
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Tracked</div><div class="metric-value cyan" id="cs-cnt-total">0</div><div class="metric-sub">tickers</div></div>
+    <div class="metric"><div class="metric-label">Strong</div><div class="metric-value green" id="cs-cnt-strong">0</div><div class="metric-sub">6-7 criteria</div></div>
+    <div class="metric"><div class="metric-label">Watch</div><div class="metric-value amber" id="cs-cnt-watch">0</div><div class="metric-sub">4-5 criteria</div></div>
+    <div class="metric"><div class="metric-label">Weak</div><div class="metric-value red" id="cs-cnt-weak">0</div><div class="metric-sub">0-3 criteria</div></div>
+  </div>
+
+  <div class="sh">Add Ticker <span class="sh-sub">long-term trend screen — manual, no data pulled</span></div>
+  <div class="form-card" style="margin-bottom:16px;">
+    <div class="fg3">
+      <div class="ff"><label>Ticker</label><input type="text" id="cs-input-sym" placeholder="e.g. NVDA" maxlength="10"/></div>
+      <div class="ff"><label>Sector</label>
+        <select id="cs-input-sector">
+          <option value="AI">AI</option>
+          <option value="Tech">Tech</option>
+          <option value="Medical">Medical</option>
+          <option value="Oil">Oil</option>
+          <option value="Crypto">Crypto</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="ff"><label>&nbsp;</label><button class="btn btn-cyan" onclick="addCanslimTicker()">+ Add Ticker</button></div>
+    </div>
+  </div>
+
+  <div class="sh">Screen
+    <div class="filt-row">
+      <select id="cs-filt-sector" onchange="renderCanslim()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;">
+        <option value="">All Sectors</option>
+        <option value="AI">AI</option>
+        <option value="Tech">Tech</option>
+        <option value="Medical">Medical</option>
+        <option value="Oil">Oil</option>
+        <option value="Crypto">Crypto</option>
+        <option value="Other">Other</option>
+      </select>
+      <button class="filt-btn active" id="cs-sort-score" onclick="setCanslimSort('score',this)">Sort: Score</button>
+      <button class="filt-btn" id="cs-sort-recent" onclick="setCanslimSort('recent',this)">Sort: Last Reviewed</button>
+    </div>
+  </div>
+  <div id="canslim-list"></div>
 </div>
 
 <!-- ══════════════════════════════════════
