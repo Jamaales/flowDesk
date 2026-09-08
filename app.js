@@ -95,7 +95,6 @@ function switchTab(tab,el){
 function setChecklistMode(mode){
   checklistMode = mode;
   localStorage.setItem('fd_checklist_mode', mode);
-  // update toggle buttons
   var callBtn = document.getElementById('cl-toggle-call');
   var putBtn = document.getElementById('cl-toggle-put');
   if(callBtn && putBtn){
@@ -120,7 +119,6 @@ function setChecklistMode(mode){
 
 function renderChecklist(){
   var list = checklistMode === 'call' ? CHECKLIST_CALL : CHECKLIST_PUT;
-  var color = checklistMode === 'call' ? 'var(--green)' : 'var(--red)';
   document.getElementById('checklist-items').innerHTML = list.map(function(item){
     var done = !!checklistState[item.id];
     return '<div class="ci'+(done?' done':'')+'" onclick="toggleCheck(\''+item.id+'\')">'
@@ -342,6 +340,130 @@ function saveNotes(){
 
 function saveField(field,val){
   if(selected!==null){tickers[selected][field]=val;save();if(field==='price')updateEmaBiasDisplay();}
+}
+
+// ════════════════════════════════════════
+// CAN SLIM
+// ════════════════════════════════════════
+let canslim = JSON.parse(localStorage.getItem('fd_canslim') || '[]');
+let csSortMode = localStorage.getItem('fd_canslim_sort') || 'score';
+
+const CANSLIM_CRITERIA = [
+  {id:'c', label:'Current Earnings', hint:'Quarterly EPS +25% YoY'},
+  {id:'a', label:'Annual Earnings', hint:'3-yr EPS growth trend'},
+  {id:'n', label:'New', hint:'New product/mgmt/high/condition'},
+  {id:'s', label:'Supply & Demand', hint:'Volume confirms the move'},
+  {id:'l', label:'Leader', hint:'Top 1-2 in industry group'},
+  {id:'i', label:'Institutional', hint:'Rising fund ownership'},
+  {id:'m', label:'Market Direction', hint:'Overall market trend supportive'},
+];
+
+const saveCanslim = () => localStorage.setItem('fd_canslim', JSON.stringify(canslim));
+
+function csScoreOf(e){
+  return CANSLIM_CRITERIA.filter(function(c){return !!e.criteria[c.id];}).length;
+}
+function csScoreMeta(n){
+  if(n>=6)return{t:'STRONG',c:'sc-strong'};
+  if(n>=4)return{t:'WATCH',c:'sc-watch'};
+  return{t:'WEAK',c:'sc-weak'};
+}
+
+function addCanslimTicker(){
+  const inp=document.getElementById('cs-input-sym');
+  const sym=inp.value.trim().toUpperCase();
+  const sector=document.getElementById('cs-input-sector').value;
+  if(!sym||canslim.find(function(e){return e.symbol===sym;})){inp.value='';return;}
+  canslim.push({
+    symbol:sym,
+    sector:sector,
+    criteria:{c:false,a:false,n:false,s:false,l:false,i:false,m:false},
+    notes:'',
+    reviewed:new Date().toISOString().split('T')[0]
+  });
+  inp.value='';
+  saveCanslim();renderCanslim();
+}
+
+function removeCanslimEntry(sym){
+  canslim=canslim.filter(function(e){return e.symbol!==sym;});
+  saveCanslim();renderCanslim();
+}
+
+function toggleCanslimCriteria(sym,critId){
+  const e=canslim.find(function(x){return x.symbol===sym;});
+  if(!e)return;
+  e.criteria[critId]=!e.criteria[critId];
+  e.reviewed=new Date().toISOString().split('T')[0];
+  saveCanslim();renderCanslim();
+}
+
+function saveCanslimNotes(sym,val){
+  const e=canslim.find(function(x){return x.symbol===sym;});
+  if(!e)return;
+  e.notes=val;
+  saveCanslim();
+}
+
+function saveCanslimSector(sym,val){
+  const e=canslim.find(function(x){return x.symbol===sym;});
+  if(!e)return;
+  e.sector=val;
+  saveCanslim();
+}
+
+function setCanslimSort(mode,el){
+  csSortMode=mode;
+  localStorage.setItem('fd_canslim_sort',mode);
+  document.querySelectorAll('#page-canslim .filt-btn').forEach(function(b){b.classList.remove('active');});
+  if(el)el.classList.add('active');
+  renderCanslim();
+}
+
+function updateCanslimMetrics(){
+  document.getElementById('cs-cnt-total').textContent=canslim.length;
+  document.getElementById('cs-cnt-strong').textContent=canslim.filter(function(e){return csScoreOf(e)>=6;}).length;
+  document.getElementById('cs-cnt-watch').textContent=canslim.filter(function(e){const s=csScoreOf(e);return s>=4&&s<6;}).length;
+  document.getElementById('cs-cnt-weak').textContent=canslim.filter(function(e){return csScoreOf(e)<4;}).length;
+}
+
+function renderCanslim(){
+  const list=document.getElementById('canslim-list');
+  const sectorFilter=document.getElementById('cs-filt-sector')?document.getElementById('cs-filt-sector').value:'';
+  let filtered=canslim.filter(function(e){return !sectorFilter||e.sector===sectorFilter;});
+  if(csSortMode==='score'){
+    filtered=filtered.slice().sort(function(a,b){return csScoreOf(b)-csScoreOf(a);});
+  }else{
+    filtered=filtered.slice().sort(function(a,b){return (b.reviewed||'').localeCompare(a.reviewed||'');});
+  }
+  if(!filtered.length){
+    list.innerHTML='<div class="empty">No tickers on the CAN SLIM screen yet. Add one above.</div>';
+    updateCanslimMetrics();return;
+  }
+  list.innerHTML=filtered.map(function(e){
+    const score=csScoreOf(e);
+    const sm=csScoreMeta(score);
+    const checklistHtml=CANSLIM_CRITERIA.map(function(c){
+      const done=!!e.criteria[c.id];
+      return '<div class="ci'+(done?' done':'')+'" onclick="toggleCanslimCriteria(\''+e.symbol+'\',\''+c.id+'\')">'
+        +'<div class="ci-box">'+(done?'✓':'')+'</div>'
+        +'<div class="ci-lbl">'+c.label+'</div>'
+        +'<div class="ci-hint">'+c.hint+'</div>'
+        +'</div>';
+    }).join('');
+    return '<div class="cs-card">'
+      +'<div class="cs-top">'
+      +'<span class="ticker-mono">'+e.symbol+'</span>'
+      +'<span class="score-badge '+sm.c+'">'+sm.t+' '+score+'/7</span>'
+      +'<span class="cs-sector">'+e.sector+'</span>'
+      +'<span class="cs-reviewed">reviewed '+(e.reviewed||'--')+'</span>'
+      +'<button class="rm-btn" onclick="removeCanslimEntry(\''+e.symbol+'\')">X</button>'
+      +'</div>'
+      +'<div class="cs-checklist">'+checklistHtml+'</div>'
+      +'<textarea class="thesis-area" placeholder="Catalyst, sector context, why it screens well..." oninput="saveCanslimNotes(\''+e.symbol+'\',this.value)">'+(e.notes||'')+'</textarea>'
+      +'</div>';
+  }).join('');
+  updateCanslimMetrics();
 }
 
 // ════════════════════════════════════════
@@ -643,7 +765,6 @@ function openBtDetail(id){
   var modeLabel = e.checklist && e.checklist.mode ? e.checklist.mode.toUpperCase() : '--';
   var modeBadgeColor = modeLabel==='CALL'?'var(--green)':'var(--red)';
 
-  // build checklist review
   var clHTML = '';
   if(e.checklist){
     var keys = Object.keys(e.checklist).filter(function(k){return k!=='mode';});
@@ -664,7 +785,6 @@ function openBtDetail(id){
   modal.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="closeBtDetail(event)">'
     +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px;" onclick="event.stopPropagation()">'
 
-    // header
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">'
     +'<div style="display:flex;align-items:center;gap:10px;">'
     +'<span style="font-family:monospace;font-size:18px;font-weight:700;color:var(--cyan);">'+e.stock+'</span>'
@@ -677,7 +797,6 @@ function openBtDetail(id){
     +'</div>'
     +'</div>'
 
-    // stats grid
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
     +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Date</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+e.date+'</div></div>'
     +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Time</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+(e.time||'--')+'</div></div>'
@@ -692,15 +811,12 @@ function openBtDetail(id){
     +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;font-family:monospace;text-transform:uppercase;">Exit</div><div style="font-family:monospace;font-size:12px;font-weight:600;">'+(e.exit?'$'+e.exit:'--')+'</div></div>'
     +'</div>'
 
-    // checklist review
     +(clHTML?'<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-family:monospace;">Checklist Review</div>'
     +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px;">'+clHTML+'</div>':'')
 
-    // notes
     +'<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:monospace;">Setup Notes</div>'
     +'<textarea id="bt-detail-notes" style="width:100%;font-size:12px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);resize:vertical;min-height:80px;font-family:sans-serif;outline:none;line-height:1.6;margin-bottom:14px;" placeholder="Setup notes...">'+(e.notes||'')+'</textarea>'
 
-    // lessons learned
     +'<div style="font-size:10px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:monospace;">Lessons Learned</div>'
     +'<textarea id="bt-detail-lessons" style="width:100%;font-size:12px;padding:10px 12px;border:1px solid var(--cyan-border);border-radius:8px;background:var(--cyan-dim);color:var(--text);resize:vertical;min-height:80px;font-family:sans-serif;outline:none;line-height:1.6;" placeholder="What did this trade teach you? What would you do differently? What did you do well?">'+(e.lessons||'')+'</textarea>'
 
@@ -749,3 +865,4 @@ updateBtStats();
 renderBtTable();
 clearBtForm();
 setBtMode(btMode);
+renderCanslim();
